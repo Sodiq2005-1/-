@@ -45,7 +45,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 alert(`Хуш омадед, ${fullname}! Бақайдгирӣ бо муваффақият гузашт! 🎉`);
                 
                 registrationForm.style.display = "none";
-                if (welcomeModal) welcomeModal.style.display = "none";
+                if (welcomeModal) {
+                    welcomeModal.style.display = "none";
+                }
 
                 if (mathContainer) {
                     mathContainer.style.display = "block";
@@ -58,13 +60,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// Генератори саволҳои беохир ва тасодуфӣ барои ҳамаи 10 фан
 function loadInfiniteQuestion(subject, grade, fullname) {
     const mathContainer = document.getElementById("math-container");
     if (!mathContainer) return;
 
     let subjectName = "";
-    let qData = {}; // Объект барои нигоҳ доштани савол ва ҷавоби дуруст
+    let qData = {};
 
     switch(subject) {
         case "math":
@@ -112,7 +113,6 @@ function loadInfiniteQuestion(subject, grade, fullname) {
             qData = generateMathRandom(grade);
     }
 
-    // Дар глобалӣ нигоҳ доштани ҷавоби дуруст барои санҷиш
     window.currentCorrectAnswer = qData.answer;
 
     mathContainer.innerHTML = `
@@ -138,7 +138,6 @@ function loadInfiniteQuestion(subject, grade, fullname) {
         location.reload();
     });
 
-    // Мантиқи санҷиши ҷавоб
     const checkBtn = document.getElementById("check-btn");
     const userAnswer = document.getElementById("user-answer");
     const resultMessage = document.getElementById("result-message");
@@ -159,13 +158,10 @@ function loadInfiniteQuestion(subject, grade, fullname) {
         }
     });
 
-    // Гузаштан ба саволи нави тасодуфӣ
     nextBtn.addEventListener("click", () => {
         loadInfiniteQuestion(subject, grade, fullname);
     });
 }
-
-// --- ФУНКСИЯҲОИ ТАВЛИДИ МИССОЛ ВА САВОЛҲОИ ТАСОДУФӢ БАРОИ ҲАР 10 ФАН ---
 
 function generateMathRandom(grade) {
     let a = Math.floor(Math.random() * 50) + 2;
