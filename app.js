@@ -1,12 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
-    console.log("Платформаи бисёрифтаи «Академияи Рақамӣ» (10 фан) оғоз ёфт!");
+    console.log("Платформаи «Академияи Рақамӣ» бо генератори саволҳои беохир оғоз шуд!");
 
     const welcomeModal = document.getElementById("welcomeModal");
     const closeModalBtn = document.getElementById("closeModalBtn");
     const registrationForm = document.getElementById("registration-form");
     const mathContainer = document.getElementById("math-container");
 
-    // Пӯшидани равзанаи истиқбол бо пахши тугма
     if (closeModalBtn && welcomeModal) {
         closeModalBtn.addEventListener("click", () => {
             welcomeModal.style.opacity = "0";
@@ -16,7 +15,6 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Санҷидани он ки агар корбар аллакай бақайдгирӣ гузашта бошад
     const savedUser = localStorage.getItem("current_user");
     if (savedUser) {
         const userData = JSON.parse(savedUser);
@@ -24,11 +22,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (registrationForm) registrationForm.style.display = "none";
         if (mathContainer) {
             mathContainer.style.display = "block";
-            loadSubjectContent(userData.subject || "math", userData.grade);
+            loadInfiniteQuestion(userData.subject || "math", userData.grade, userData.fullname);
         }
     }
 
-    // Қисмати бақайдгирии хонанда ва захира дар LocalStorage
     if (registrationForm) {
         registrationForm.addEventListener("submit", (e) => {
             e.preventDefault();
@@ -36,35 +33,23 @@ document.addEventListener("DOMContentLoaded", () => {
             const language = document.getElementById("language-select") ? document.getElementById("language-select").value : "tg";
             const fullname = document.getElementById("fullname") ? document.getElementById("fullname").value.trim() : "";
             const grade = document.getElementById("grade-select") ? document.getElementById("grade-select").value : "";
-            
             const subjectSelect = document.getElementById("subject-select");
             const subject = subjectSelect ? subjectSelect.value : "math";
-            
             const school = document.getElementById("school") ? document.getElementById("school").value.trim() : "";
             const region = document.getElementById("region") ? document.getElementById("region").value.trim() : "";
 
             if (fullname && grade) {
-                const userData = {
-                    language: language,
-                    fullname: fullname,
-                    grade: grade,
-                    subject: subject,
-                    school: school,
-                    region: region
-                };
-
+                const userData = { language, fullname, grade, subject, school, region };
                 localStorage.setItem("current_user", JSON.stringify(userData));
 
                 alert(`Хуш омадед, ${fullname}! Бақайдгирӣ бо муваффақият гузашт! 🎉`);
                 
                 registrationForm.style.display = "none";
-                if (welcomeModal) {
-                    welcomeModal.style.display = "none";
-                }
+                if (welcomeModal) welcomeModal.style.display = "none";
 
                 if (mathContainer) {
                     mathContainer.style.display = "block";
-                    loadSubjectContent(subject, grade);
+                    loadInfiniteQuestion(subject, grade, fullname);
                 }
             } else {
                 alert("Лутфан ному насаб ва синфи худро пур кунед!");
@@ -73,68 +58,78 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// Боргузории мазмуни фанҳои 10-гона вобаста ба синф
-function loadSubjectContent(subject, grade) {
+// Генератори саволҳои беохир ва тасодуфӣ барои ҳамаи 10 фан
+function loadInfiniteQuestion(subject, grade, fullname) {
     const mathContainer = document.getElementById("math-container");
     if (!mathContainer) return;
 
     let subjectName = "";
-    let contentHTML = "";
+    let qData = {}; // Объект барои нигоҳ доштани савол ва ҷавоби дуруст
 
     switch(subject) {
         case "math":
             subjectName = "Математика";
-            contentHTML = getMathHTML(grade);
+            qData = generateMathRandom(grade);
             break;
         case "physics":
             subjectName = "Физика";
-            contentHTML = getPhysicsHTML(grade);
+            qData = generatePhysicsRandom(grade);
             break;
         case "chemistry":
             subjectName = "Химия";
-            contentHTML = getChemistryHTML(grade);
+            qData = generateChemistryRandom(grade);
             break;
         case "tajik":
             subjectName = "Забони тоҷикӣ";
-            contentHTML = getTajikHTML(grade);
+            qData = generateTajikRandom(grade);
             break;
         case "history":
             subjectName = "Таърихи тоҷикон";
-            contentHTML = getHistoryHTML(grade);
+            qData = generateHistoryRandom(grade);
             break;
         case "geography":
             subjectName = "География";
-            contentHTML = getGeographyHTML(grade);
+            qData = generateGeographyRandom(grade);
             break;
         case "biology":
             subjectName = "Биология";
-            contentHTML = getBiologyHTML(grade);
+            qData = generateBiologyRandom(grade);
             break;
         case "informatics":
             subjectName = "Информатика";
-            contentHTML = getInformaticsHTML(grade);
+            qData = generateInformaticsRandom(grade);
             break;
         case "russian":
             subjectName = "Забони русӣ";
-            contentHTML = getRussianHTML(grade);
+            qData = generateRussianRandom(grade);
             break;
         case "english":
             subjectName = "Забони англисӣ";
-            contentHTML = getEnglishHTML(grade);
+            qData = generateEnglishRandom(grade);
             break;
         default:
             subjectName = "Математика";
-            contentHTML = getMathHTML(grade);
+            qData = generateMathRandom(grade);
     }
 
+    // Дар глобалӣ нигоҳ доштани ҷавоби дуруст барои санҷиш
+    window.currentCorrectAnswer = qData.answer;
+
     mathContainer.innerHTML = `
-        <div style="padding: 25px; font-family: sans-serif; background: #ffffff; border: 2px solid #007bff; border-radius: 10px; max-width: 520px; margin: 20px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+        <div style="padding: 25px; font-family: sans-serif; background: #ffffff; border: 2px solid #007bff; border-radius: 10px; max-width: 550px; margin: 20px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="color: #007bff; margin: 0;">${subjectName} (Синфи ${grade})</h2>
-                <button id="change-subject" style="padding: 5px 10px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Ивази фан</button>
+                <h3 style="color: #007bff; margin: 0;">📚 ${subjectName} (Синфи ${grade})</h3>
+                <button id="change-subject" style="padding: 5px 10px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Ивази фан</button>
             </div>
+            <p style="color: #555; font-size: 13px; margin-top: 5px;">Хонанда: <b>${fullname}</b> | Реҷа: <i>Саволҳои беохир ♾️</i></p>
             <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
-            ${contentHTML}
+            
+            <p style="font-size: 16px; font-weight: bold; color: #333;">${qData.question}</p>
+            <input type="text" id="user-answer" placeholder="Ҷавоби худро нависед..." style="padding: 10px; font-size: 16px; width: 200px; border: 1px solid #ccc; border-radius: 4px;">
+            <button id="check-btn" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-left: 5px;">Санҷидан</button>
+            
+            <div id="result-message" style="margin-top: 15px; font-weight: bold; font-size: 16px;"></div>
+            <button id="next-btn" style="margin-top: 15px; padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; display: none; font-size: 15px;">Саволи баъдӣ (Беохир) ➡️</button>
         </div>
     `;
 
@@ -143,147 +138,134 @@ function loadSubjectContent(subject, grade) {
         location.reload();
     });
 
-    initSubjectLogic(subject, grade);
-}
-
-// Генераторҳои саволҳо барои ҳар 10 фан
-function getMathHTML(grade) {
-    let n1 = Math.floor(Math.random() * 30) + 2;
-    let n2 = Math.floor(Math.random() * 10) + 2;
-    return `
-        <p>Мисоли зеринро ҳал кунед:</p>
-        <div id="exercise-box" style="font-size: 26px; margin: 15px 0; font-weight: bold;">${n1} × ${n2} = ?</div>
-        <input type="number" id="user-answer" placeholder="Ҷавоб" style="padding: 8px; font-size: 16px; width: 150px;">
-        <button id="check-btn" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Санҷидан</button>
-        <div id="result-message" style="margin-top: 15px; font-weight: bold;"></div>
-        <button id="next-btn" style="margin-top: 15px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; display: none;">Саволи нав ➡️</button>
-    `;
-}
-
-function getPhysicsHTML(grade) {
-    return `
-        <p><b>Савол:</b> Суръати рӯшноӣ дар холигӣ (вакуум) чанд км/с аст?</p>
-        <input type="text" id="user-answer" placeholder="Масалан: 300000" style="padding: 8px; font-size: 14px; width: 180px;">
-        <button id="check-btn" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Санҷидан</button>
-        <div id="result-message" style="margin-top: 15px; font-weight: bold;"></div>
-        <button id="next-btn" style="margin-top: 15px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; display: none;">Саволи нав ➡️</button>
-    `;
-}
-
-function getChemistryHTML(grade) {
-    return `
-        <p><b>Савол:</b> Рамзи химиявии элементи «Оксиген» кадом аст?</p>
-        <input type="text" id="user-answer" placeholder="Ҳарф бо лотинӣ" style="padding: 8px; font-size: 14px; width: 150px;">
-        <button id="check-btn" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Санҷидан</button>
-        <div id="result-message" style="margin-top: 15px; font-weight: bold;"></div>
-        <button id="next-btn" style="margin-top: 15px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; display: none;">Саволи нав ➡️</button>
-    `;
-}
-
-function getTajikHTML(grade) {
-    return `
-        <p><b>Савол:</b> Дар забони тоҷикӣ чанд ҳарф мавҷуд аст?</p>
-        <input type="number" id="user-answer" placeholder="Рақам" style="padding: 8px; font-size: 16px; width: 100px;">
-        <button id="check-btn" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Санҷидан</button>
-        <div id="result-message" style="margin-top: 15px; font-weight: bold;"></div>
-        <button id="next-btn" style="margin-top: 15px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; display: none;">Саволи нав ➡️</button>
-    `;
-}
-
-function getHistoryHTML(grade) {
-    return `
-        <p><b>Савол:</b> Пойтахти давлати Сомониён кадом шаҳр буд?</p>
-        <input type="text" id="user-answer" placeholder="Номи шаҳр" style="padding: 8px; font-size: 14px; width: 180px;">
-        <button id="check-btn" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Санҷидан</button>
-        <div id="result-message" style="margin-top: 15px; font-weight: bold;"></div>
-        <button id="next-btn" style="margin-top: 15px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; display: none;">Саволи нав ➡️</button>
-    `;
-}
-
-function getGeographyHTML(grade) {
-    return `
-        <p><b>Савол:</b> Калонтарин қитъаи Замин кадом аст?</p>
-        <input type="text" id="user-answer" placeholder="Номи қитъа" style="padding: 8px; font-size: 14px; width: 180px;">
-        <button id="check-btn" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Санҷидан</button>
-        <div id="result-message" style="margin-top: 15px; font-weight: bold;"></div>
-        <button id="next-btn" style="margin-top: 15px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; display: none;">Саволи нав ➡️</button>
-    `;
-}
-
-function getBiologyHTML(grade) {
-    return `
-        <p><b>Савол:</b> Илми омӯзиши растаниҳо чӣ номида мешавад?</p>
-        <input type="text" id="user-answer" placeholder="Номи илм" style="padding: 8px; font-size: 14px; width: 180px;">
-        <button id="check-btn" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Санҷидан</button>
-        <div id="result-message" style="margin-top: 15px; font-weight: bold;"></div>
-        <button id="next-btn" style="margin-top: 15px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; display: none;">Саволи нав ➡️</button>
-    `;
-}
-
-function getInformaticsHTML(grade) {
-    return `
-        <p><b>Савол:</b> Воҳиди асосии ченкунии ахборот дар компютер чӣ номида мешавад?</p>
-        <input type="text" id="user-answer" placeholder="Масалан: байт" style="padding: 8px; font-size: 14px; width: 180px;">
-        <button id="check-btn" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Санҷидан</button>
-        <div id="result-message" style="margin-top: 15px; font-weight: bold;"></div>
-        <button id="next-btn" style="margin-top: 15px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; display: none;">Саволи нав ➡️</button>
-    `;
-}
-
-function getRussianHTML(grade) {
-    return `
-        <p><b>Савол (Русский язык):</b> Переведите на русский язык слово «Китоб»:</p>
-        <input type="text" id="user-answer" placeholder="Ответ по-русски" style="padding: 8px; font-size: 14px; width: 180px;">
-        <button id="check-btn" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Санҷидан</button>
-        <div id="result-message" style="margin-top: 15px; font-weight: bold;"></div>
-        <button id="next-btn" style="margin-top: 15px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; display: none;">Саволи нав ➡️</button>
-    `;
-}
-
-function getEnglishHTML(grade) {
-    return `
-        <p><b>Савол (English):</b> Translate into English: «Мактаб»</p>
-        <input type="text" id="user-answer" placeholder="Answer in English" style="padding: 8px; font-size: 14px; width: 180px;">
-        <button id="check-btn" style="padding: 8px 15px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">Санҷидан</button>
-        <div id="result-message" style="margin-top: 15px; font-weight: bold;"></div>
-        <button id="next-btn" style="margin-top: 15px; padding: 6px 12px; background: #007bff; color: white; border: none; border-radius: 4px; display: none;">Саволи нав ➡️</button>
-    `;
-}
-
-// Санҷиши ҷавобҳо барои ҳамаи 10 фан
-function initSubjectLogic(subject, grade) {
+    // Мантиқи санҷиши ҷавоб
     const checkBtn = document.getElementById("check-btn");
     const userAnswer = document.getElementById("user-answer");
     const resultMessage = document.getElementById("result-message");
     const nextBtn = document.getElementById("next-btn");
 
     checkBtn.addEventListener("click", () => {
-        const val = userAnswer.value.trim().toLowerCase();
-        let isCorrect = false;
+        const userVal = userAnswer.value.trim().toLowerCase();
+        const correctVal = String(window.currentCorrectAnswer).trim().toLowerCase();
 
-        if (subject === "math") isCorrect = (Number(val) > 0);
-        else if (subject === "physics") isCorrect = val.includes("300000") || val.includes("300 000");
-        else if (subject === "chemistry") isCorrect = val === "o" || val === "о";
-        else if (subject === "tajik") isCorrect = val === "35" || val === "сиву панҷ";
-        else if (subject === "history") isCorrect = val.includes("бухоро") || val.includes("бухороӣ");
-        else if (subject === "geography") isCorrect = val.includes("осиё") || val.includes("евразия");
-        else if (subject === "biology") isCorrect = val.includes("ботаника") || val.includes("наботот");
-        else if (subject === "informatics") isCorrect = val.includes("байт") || val.includes("бит");
-        else if (subject === "russian") isCorrect = val.includes("книга");
-        else if (subject === "english") isCorrect = val.includes("school");
-
-        if (isCorrect) {
+        if (userVal === correctVal || userVal.includes(correctVal)) {
             resultMessage.style.color = "green";
-            resultMessage.textContent = "Дуруст аст! Офарин! 🌟";
+            resultMessage.textContent = `Дуруст аст, ${fullname}! Офарин! 🌟`;
             checkBtn.style.display = "none";
             nextBtn.style.display = "inline-block";
         } else {
             resultMessage.style.color = "red";
-            resultMessage.textContent = "Ҷавоб хато аст. Боз кӯшиш кунед!";
+            resultMessage.textContent = `Хато аст. Ҷавоби дуруст: "${window.currentCorrectAnswer}". Боз кӯшиш кунед!`;
         }
     });
 
+    // Гузаштан ба саволи нави тасодуфӣ
     nextBtn.addEventListener("click", () => {
-        loadSubjectContent(subject, grade);
+        loadInfiniteQuestion(subject, grade, fullname);
     });
+}
+
+// --- ФУНКСИЯҲОИ ТАВЛИДИ МИССОЛ ВА САВОЛҲОИ ТАСОДУФӢ БАРОИ ҲАР 10 ФАН ---
+
+function generateMathRandom(grade) {
+    let a = Math.floor(Math.random() * 50) + 2;
+    let b = Math.floor(Math.random() * 20) + 2;
+    let ops = ["+", "-", "×"];
+    let op = ops[Math.floor(Math.random() * ops.length)];
+    let res = 0;
+    if (op === "+") res = a + b;
+    else if (op === "-") { if(a < b) [a, b] = [b, a]; res = a - b; }
+    else res = a * b;
+
+    return { question: `Ин мисолро ҳал кунед: ${a} ${op} ${b} = ?`, answer: res };
+}
+
+function generatePhysicsRandom(grade) {
+    let questions = [
+        { q: "Суръати рӯшноӣ дар вакуум чанд км/с аст?", a: "300000" },
+        { q: "Қувва бо кадом воҳид ченак карда мешавад?", a: "нютон" },
+        { q: "Шитоби ҷозибаи Замин тақрибан чанд аст? (рақами танҳо)", a: "9.8" },
+        { q: "Энергия бо кадом воҳид чен карда мешавад?", a: "жоул" }
+    ];
+    return questions[Math.floor(Math.random() * questions.length)];
+}
+
+function generateChemistryRandom(grade) {
+    let questions = [
+        { q: "Рамзи химиявии элементи «Оксиген» кадом аст?", a: "о" },
+        { q: "Формулаи химиявии об кадом аст?", a: "h2o" },
+        { q: "Рамзи химиявии «Водород» кадом аст?", a: "h" },
+        { q: "Рамзи химиявии «Оҳан» кадом аст?", a: "fe" }
+    ];
+    return questions[Math.floor(Math.random() * questions.length)];
+}
+
+function generateTajikRandom(grade) {
+    let questions = [
+        { q: "Дар алифбои забони тоҷикӣ чанд ҳарф мавҷуд аст?", a: "35" },
+        { q: "Қисми асосии мустақили нутқ, ки номи предметро ифода мекунад, чӣ номида мешавад?", a: "исм" },
+        { q: "Шумора чанд хел мешавад? (бо рақам нависед)", a: "2" },
+        { q: "Феъл чиро ифода мекунад?", a: "ҳаракат" }
+    ];
+    return questions[Math.floor(Math.random() * questions.length)];
+}
+
+function generateHistoryRandom(grade) {
+    let questions = [
+        { q: "Пойтахти давлати Сомониён кадом шаҳр буд?", a: "бухоро" },
+        { q: "Бӯнёдгузори давлати Сомониён кист? (ном)", a: "имомӣ" },
+        { q: "Шоҳномаи Фирдавсӣ дар асри чанд навишта шудааст? (масалан: X)", a: "x" },
+        { q: "Давлати Кушониён дар асри чанд ба оҷил расид? (ё номи асосгузор)", a: "кадфиз" }
+    ];
+    return questions[Math.floor(Math.random() * questions.length)];
+}
+
+function generateGeographyRandom(grade) {
+    let questions = [
+        { q: "Калонтарин қитъаи Замин кадом аст?", a: "осиё" },
+        { q: "Дарёи дарозтарини ҷаҳон кадом аст?", a: "нил" },
+        { q: "Уқёнуси бузургтарини ҷаҳон кадом аст?", a: "ором" },
+        { q: "Қуллаи баландтарини Тоҷикистон кадом аст?", a: "сомон" }
+    ];
+    return questions[Math.floor(Math.random() * questions.length)];
+}
+
+function generateBiologyRandom(grade) {
+    let questions = [
+        { q: "Илме, ки наботот ва растаниҳоро меомӯзад, чӣ ном дорад?", a: "ботаника" },
+        { q: "Илме, ки ҳайвонотро меомӯзад, чӣ ном дорад?", a: "зоология" },
+        { q: "Воҳиди асосии сохтории ҳама гуна организм чӣ номида мешавад?", a: "ҳуҷайра" },
+        { q: "Организмҳо бо роҳи кадом ҷараён нафас мегиранд ва оксиген мегиранд?", a: "нафаскашӣ" }
+    ];
+    return questions[Math.floor(Math.random() * questions.length)];
+}
+
+function generateInformaticsRandom(grade) {
+    let questions = [
+        { q: "Воҳиди хурдтарини ченкунии ахборот дар компютер чӣ ном дорад?", a: "бит" },
+        { q: "8 бит ба чанд байт баробар аст?", a: "1" },
+        { q: "Қисми асосии коркарди маълумот дар компютер чӣ номида мешавад? (бо забони русӣ ё лотинӣ)", a: "cpu" },
+        { q: "Барномае, ки барои кушодани саҳифаҳои интернетӣ хизмат мекунад, чӣ ном дорад?", a: "браузер" }
+    ];
+    return questions[Math.floor(Math.random() * questions.length)];
+}
+
+function generateRussianRandom(grade) {
+    let questions = [
+        { q: "Переведите на русский язык слово «Китоб»:", a: "книга" },
+        { q: "Переведите на русский язык слово «Мактаб»:", a: "школа" },
+        { q: "Сколько падежей в русском языке? (цифра)", a: "6" },
+        { q: "Как переводится слово «Олам»?", a: "мир" }
+    ];
+    return questions[Math.floor(Math.random() * questions.length)];
+}
+
+function generateEnglishRandom(grade) {
+    let questions = [
+        { q: "Translate into English: «Мактаб»", a: "school" },
+        { q: "Translate into English: «Китоб»", a: "book" },
+        { q: "Translate into English: «Об»", a: "water" },
+        { q: "Translate into English: «Дӯст»", a: "friend" }
+    ];
+    return questions[Math.floor(Math.random() * questions.length)];
 }
